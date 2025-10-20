@@ -1,14 +1,47 @@
+// Game difficulty configurations
+const difficulties = {
+    easy: {
+        gameTime: 45,           // Longer game time
+        targetScore: 1000,      // Lower score requirement
+        dropSpawnRate: 1200,    // Slower drop spawning (ms)
+        dropSpeed: 1.5,         // Slower falling speed
+        basePoints: 100,        // Base points per drop
+        comboWindow: 800,       // Longer combo time window (ms)
+        maxMultiplier: 2        // Lower max score multiplier
+    },
+    normal: {
+        gameTime: 30,           // Standard game time
+        targetScore: 2000,      // Standard score requirement
+        dropSpawnRate: 1000,    // Standard drop spawning
+        dropSpeed: 2,           // Standard falling speed
+        basePoints: 100,        // Standard points per drop
+        comboWindow: 500,       // Standard combo time window
+        maxMultiplier: 3        // Standard max score multiplier
+    },
+    hard: {
+        gameTime: 20,           // Shorter game time
+        targetScore: 3000,      // Higher score requirement
+        dropSpawnRate: 800,     // Faster drop spawning
+        dropSpeed: 3,           // Faster falling speed
+        basePoints: 100,        // Same base points
+        comboWindow: 400,       // Shorter combo window
+        maxMultiplier: 4        // Higher max score multiplier
+    }
+};
+
 // Variables to control game state
-let gameRunning = false; // Keeps track of whether game is active or not
-let dropMaker; // Will store our timer that creates drops regularly
-let gameTimer; // Will store our countdown timer
-let timeLeft = 30; // Game duration in seconds
-let score = 0; // Track player's score
+let gameRunning = false;        // Keeps track of whether game is active or not
+let dropMaker;                  // Will store our timer that creates drops regularly
+let gameTimer;                  // Will store our countdown timer
+let currentDifficulty = null;   // Track selected difficulty
+let gameConfig = null;          // Current game configuration
+let timeLeft = 30;              // Game duration in seconds
+let score = 0;                  // Track player's score
 let highScore = localStorage.getItem('highScore') || 0; // Track high score
-let scoreMultiplier = 1; // Score multiplier for combos
-let lastScoreTime = 0; // Track timing for combo system
-let dropsCollected = 0; // Track total drops for impact calculation
-let peopleHelped = 0; // Track number of people helped
+let scoreMultiplier = 1;        // Score multiplier for combos
+let lastScoreTime = 0;          // Track timing for combo system
+let dropsCollected = 0;         // Track total drops for impact calculation
+let peopleHelped = 0;           // Track number of people helped
 
 // Educational facts and messages
 const waterFacts = [
@@ -23,8 +56,27 @@ const waterFacts = [
 
 // Initialize mission overlay
 document.getElementById('startMission').addEventListener('click', () => {
-    document.getElementById('missionOverlay').style.display = 'none';
-    showWaterFact();
+    // Hide the start mission button and show difficulty selection
+    document.getElementById('startMission').style.display = 'none';
+    document.getElementById('difficultySelector').style.display = 'block';
+    
+    // Add event listeners to difficulty buttons
+    const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+    difficultyButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Set the selected difficulty
+            currentDifficulty = this.getAttribute('data-difficulty');
+            gameConfig = difficulties[currentDifficulty];
+            
+            // Update game time based on difficulty
+            timeLeft = gameConfig.gameTime;
+            document.getElementById('time').textContent = timeLeft;
+            
+            // Hide the mission overlay and show the game
+            document.getElementById('missionOverlay').style.display = 'none';
+            showWaterFact();
+        });
+    });
 });
 
 // Wait for button click to start the game
@@ -68,36 +120,85 @@ function adjustGameContainer() {
 };
 
 function startGame() {
-  // Prevent multiple games from running at once
-  if (gameRunning) return;
-
-  // Reset game state
-  score = 0;
-  timeLeft = 30;
-  scoreMultiplier = 1;
-  lastScoreTime = 0;
-  updateScoreDisplay();
-  updateTimerDisplay();
-
+  if (gameRunning) return; // Prevent starting while game is running
+  
+  // Check if difficulty has been selected
+  if (!currentDifficulty || !gameConfig) {
+    currentDifficulty = 'normal'; // Default to normal if somehow missed
+    gameConfig = difficulties[currentDifficulty];
+  }
+  
   gameRunning = true;
 
-  // Create new drops every second (1000 milliseconds)
-  dropMaker = setInterval(createDrop, 1000);
+  // Reset score and combo
+  score = 0;
+  scoreMultiplier = 1;
+  dropsCollected = 0;
+  peopleHelped = 0;
+  document.getElementById("score").textContent = score;
+  document.getElementById("dropsCollected").textContent = dropsCollected;
+  document.getElementById("peopleHelped").textContent = peopleHelped;
 
-  // Start the countdown timer
+  // Set timer based on difficulty
+  timeLeft = gameConfig.gameTime;
+  document.getElementById("time").textContent = timeLeft;
   gameTimer = setInterval(() => {
     timeLeft--;
-    updateTimerDisplay();
+    document.getElementById("time").textContent = timeLeft;
+    
+    // Change timer color when time is running low
+    if (timeLeft <= Math.min(5, gameConfig.gameTime * 0.2)) { // Dynamic low time warning
+      document.getElementById("time").classList.add("time-low");
+    } else {
+      document.getElementById("time").classList.remove("time-low");
+    }
     
     if (timeLeft <= 0) {
       endGame();
     }
   }, 1000);
-
+  
+  // Start creating drops at difficulty-specific rate
+  dropMaker = setInterval(() => {
+    if (gameRunning) {
+      createDrop();
+    }
+  }, gameConfig.dropSpawnRate);
+  
   // Update the game container with a visual effect
   const gameContainer = document.getElementById("game-container");
   gameContainer.classList.add("game-started");
   setTimeout(() => gameContainer.classList.remove("game-started"), 500);
+  
+  // Display the difficulty level
+  const difficultyName = currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1);
+  showGameMessage(`${difficultyName} Mode: ${gameConfig.gameTime}s to reach ${gameConfig.targetScore} points!`);
+}
+
+// Helper function to show game messages
+function showGameMessage(message) {
+  const messageEl = document.createElement('div');
+  messageEl.className = 'game-message';
+  messageEl.textContent = message;
+  messageEl.style.position = 'absolute';
+  messageEl.style.top = '30%';
+  messageEl.style.left = '50%';
+  messageEl.style.transform = 'translate(-50%, -50%)';
+  messageEl.style.background = 'rgba(46, 157, 247, 0.9)';
+  messageEl.style.color = 'white';
+  messageEl.style.padding = '10px 20px';
+  messageEl.style.borderRadius = '8px';
+  messageEl.style.fontSize = '20px';
+  messageEl.style.fontWeight = 'bold';
+  messageEl.style.zIndex = '100';
+  
+  document.getElementById('game-container').appendChild(messageEl);
+  
+  setTimeout(() => {
+    messageEl.style.opacity = '0';
+    messageEl.style.transition = 'opacity 0.5s ease';
+    setTimeout(() => messageEl.remove(), 500);
+  }, 2000);
 }
 
 function createDrop() {
@@ -117,9 +218,10 @@ function createDrop() {
   const xPosition = Math.random() * (gameWidth - 60);
   drop.style.left = xPosition + "px";
 
-  // Make drops fall for 4 seconds
-  drop.style.animationDuration = "4s";
-
+  // Make drops fall at speed based on difficulty
+  const fallDuration = 4 / gameConfig.dropSpeed;
+  drop.style.animationDuration = `${fallDuration}s`;
+  
   // Add the new drop to the game screen
   document.getElementById("game-container").appendChild(drop);
 
@@ -134,11 +236,11 @@ function createDrop() {
   drop.addEventListener("click", () => {
     if (!gameRunning) return;
     
-    // Calculate points with combo system
-    const basePoints = 5;
+    // Calculate points with combo system based on difficulty
+    const basePoints = gameConfig.basePoints;
     const now = Date.now();
-    if (now - lastScoreTime < 1000) { // If clicked within 1 second of last click
-      scoreMultiplier = Math.min(scoreMultiplier + 0.5, 3); // Cap at 3x
+    if (now - lastScoreTime < gameConfig.comboWindow) {
+      scoreMultiplier = Math.min(scoreMultiplier + 0.5, gameConfig.maxMultiplier);
     } else {
       scoreMultiplier = 1;
     }
@@ -147,14 +249,22 @@ function createDrop() {
     const earnedPoints = Math.floor(basePoints * scoreMultiplier);
     score += earnedPoints;
     
+    // Create water splash effect
+    createWaterSplash(drop);
+    
     // Visual and audio feedback
     drop.classList.add('caught');
     playScoreSound(scoreMultiplier);
     updateScoreDisplay();
     showFloatingPoints(earnedPoints, drop, scoreMultiplier);
     
-    // Remove the drop with a small delay for animation
-    setTimeout(() => drop.remove(), 100);
+    // Shrink and fade out animation
+    drop.style.transition = 'all 0.2s ease-out';
+    drop.style.transform = 'scale(0.1)';
+    drop.style.opacity = '0';
+    
+    // Remove the drop after animation
+    setTimeout(() => drop.remove(), 200);
   });
 }
 
@@ -313,17 +423,31 @@ function endGame() {
     const drops = document.querySelectorAll('.water-drop');
     drops.forEach(drop => drop.remove());
     
+    // Check if difficulty goal was reached
+    const targetReached = score >= gameConfig.targetScore;
+    const difficultyName = currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1);
+    
     // Calculate impact
     const peopleHelped = Math.floor(score / 10); // Each 10 points = 1 person helped
+    
+    // Update high score if needed
+    const isNewHighScore = score > highScore;
+    if (isNewHighScore) {
+        highScore = score;
+        localStorage.setItem('highScore', highScore);
+    }
     
     // Show final score and impact
     const finalScoreMessage = document.createElement('div');
     finalScoreMessage.className = 'game-over-message';
     finalScoreMessage.innerHTML = `
-        <h2>Mission Complete!</h2>
+        <h2>${targetReached ? 'Mission Complete!' : 'Mission Ended'}</h2>
+        <p class="difficulty-result">${difficultyName} Mode: ${targetReached ? 
+            '<span style="color: #4FCB53;">Goal Reached!</span>' : 
+            `<span style="color: #F5402C;">Goal: ${gameConfig.targetScore} points</span>`}</p>
         <p>Water Drops Collected: ${score}</p>
         <p class="impact-message">You helped provide clean water to ${peopleHelped} people!</p>
-        ${score > highScore ? '<p class="new-high-score">New High Score! 🏆</p>' : ''}
+        ${isNewHighScore ? '<p class="new-high-score">New High Score! 🏆</p>' : ''}
         <p>Previous Best: ${highScore}</p>
         <div class="water-fact">${getRandomWaterFact()}</div>
     `;
@@ -385,4 +509,43 @@ function showMilestoneMessage() {
         milestone.classList.add('fade-out');
         setTimeout(() => milestone.remove(), 500);
     }, 2000);
+}
+
+function createWaterSplash(drop) {
+    const numParticles = 8;
+    const dropRect = drop.getBoundingClientRect();
+    const centerX = dropRect.left + dropRect.width / 2;
+    const centerY = dropRect.top + dropRect.height / 2;
+    
+    for (let i = 0; i < numParticles; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'water-particle';
+        
+        // Position at the center of the clicked drop
+        particle.style.left = centerX + 'px';
+        particle.style.top = centerY + 'px';
+        
+        // Calculate trajectory angle
+        const angle = (i / numParticles) * Math.PI * 2;
+        const speed = 2 + Math.random() * 2;
+        const distance = 30 + Math.random() * 20;
+        
+        // Set random size for variety
+        const size = 4 + Math.random() * 4;
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        
+        document.body.appendChild(particle);
+        
+        // Animate particle
+        requestAnimationFrame(() => {
+            particle.style.transform = `translate(
+                ${Math.cos(angle) * distance}px,
+                ${Math.sin(angle) * distance}px
+            ) scale(0)`;
+        });
+        
+        // Clean up particle
+        setTimeout(() => particle.remove(), 500);
+    }
 }

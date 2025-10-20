@@ -44,6 +44,28 @@
         </div>
         <button id="startMission" class="mission-button">Start Your Mission</button>
         
+        <!-- Difficulty selection section -->
+        <div id="difficultySelector" style="display: none; margin-top: 20px;">
+            <h3 style="color: #333; margin-bottom: 15px;">Select Difficulty</h3>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <button class="difficulty-btn" data-difficulty="easy" style="padding: 12px 18px; border: 2px solid #4FCB53; background: white; color: #333; border-radius: 8px; cursor: pointer; min-width: 120px; transition: all 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    <span style="font-weight: bold; font-size: 16px;">Easy</span>
+                    <small style="display: block; margin-top: 5px; color: #666;">45 seconds • 1000 points goal</small>
+                    <div style="margin-top: 8px; color: #4FCB53; font-size: 13px;">Slower drops, longer time</div>
+                </button>
+                <button class="difficulty-btn" data-difficulty="normal" style="padding: 12px 18px; border: 2px solid #2E9DF7; background: white; color: #333; border-radius: 8px; cursor: pointer; min-width: 120px; transition: all 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    <span style="font-weight: bold; font-size: 16px;">Normal</span>
+                    <small style="display: block; margin-top: 5px; color: #666;">30 seconds • 2000 points goal</small>
+                    <div style="margin-top: 8px; color: #2E9DF7; font-size: 13px;">Balanced challenge</div>
+                </button>
+                <button class="difficulty-btn" data-difficulty="hard" style="padding: 12px 18px; border: 2px solid #F5402C; background: white; color: #333; border-radius: 8px; cursor: pointer; min-width: 120px; transition: all 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    <span style="font-weight: bold; font-size: 16px;">Hard</span>
+                    <small style="display: block; margin-top: 5px; color: #666;">20 seconds • 3000 points goal</small>
+                    <div style="margin-top: 8px; color: #F5402C; font-size: 13px;">Fast drops, tight timing</div>
+                </button>
+            </div>
+        </div>
+        
         <!-- Added prominent charity: water links -->
         <div class="charity-links" style="margin-top: 20px; text-align: center;">
             <a href="https://www.charitywater.org/donate" target="_blank" rel="noopener noreferrer" 
@@ -78,6 +100,33 @@
         <div id="game-container">
         </div>
     </div>
+    
+    <!-- Footer with charity: water links -->
+    <footer style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.9); 
+                   padding: 10px 20px; text-align: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); 
+                   backdrop-filter: blur(5px); z-index: 1000;">
+        <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
+            <a href="https://www.charitywater.org" target="_blank" rel="noopener noreferrer" 
+               style="color: #2E9DF7; text-decoration: none; font-weight: 500; display: flex; align-items: center;">
+                <img src="img/cw_logo.png" alt="charity: water" style="height: 30px; margin-right: 10px;">
+                Visit charity: water
+            </a>
+            <div style="display: flex; gap: 15px;">
+                <a href="https://www.charitywater.org/donate" target="_blank" rel="noopener noreferrer" 
+                   style="display: inline-flex; align-items: center; padding: 8px 16px; background: #2E9DF7; 
+                          color: white; text-decoration: none; border-radius: 20px; font-weight: 500; 
+                          transition: all 0.3s ease;">
+                    💧 Donate Now
+                </a>
+                <a href="https://www.charitywater.org/about" target="_blank" rel="noopener noreferrer" 
+                   style="display: inline-flex; align-items: center; padding: 8px 16px; background: #159A48; 
+                          color: white; text-decoration: none; border-radius: 20px; font-weight: 500; 
+                          transition: all 0.3s ease;">
+                    ℹ️ Learn More
+                </a>
+            </div>
+        </div>
+    </footer>
     
     <script src="script.js"></script>
 </body>
