@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2E9DF7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Water Drop Game</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Prevent unwanted touch behaviors -->
+    <style>
+        body {
+            overscroll-behavior: none;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        #game-container {
+            touch-action: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="mission-overlay" id="missionOverlay">
+    <div class="mission-content">
+        <h2>Your Mission: Clean Water For All</h2>
+        <div class="mission-facts">
+            <div class="fact">
+                <span class="fact-number">785M</span>
+                <p>people lack access to clean water</p>
+            </div>
+            <div class="fact">
+                <span class="fact-number">21%</span>
+                <p>of schools lack clean water access</p>
+            </div>
+            <div class="fact">
+                <span class="fact-number">1000+</span>
+                <p>children die daily due to unsafe water</p>
+            </div>
+        </div>
+        <button id="startMission" class="mission-button">Start Your Mission</button>
+    </div>
+</div>
+
+<div class="game-wrapper">
+        <h1 class="game-title">Clean Water Mission</h1>
+        <p class="game-tagline">Help bring clean water to communities in need. Every drop counts!</p>
+        <div class="impact-tracker">
+            <div class="impact-stat">
+                <span id="dropsCollected">0</span> drops = 
+                <span id="peopleHelped">0</span> people helped
+            </div>
+        </div>
+        <div class="score-panel">
+            <div class="score">Score: <span id="score">0</span></div>
+            <div class="timer">Time: <span id="time">30</span>s</div>
+            <button id="start-btn">Start Game</button>
+        </div>
+        
+        <div id="game-container">
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
